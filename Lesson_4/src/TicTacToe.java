@@ -110,9 +110,9 @@ public class TicTacToe {
 
     private boolean checkEndGame(int r, int c, char XO){
         boolean result = false;
-        checkHorizonLine(r, c, XO);
-        checkVerticalLine(r, c, XO);
-        //checkMainDiagonale(r, c, XO);
+        //checkHorizonLine(r, c, XO);
+        //checkVerticalLine(r, c, XO);
+        checkMainDiagonale(r, c, XO);
         //checkSecondaryDiagonale(r, c, XO);
 
 
@@ -206,12 +206,17 @@ public class TicTacToe {
         }
         return result;
     }
+
+
     private void checkMainDiagonale(int r, int c, char XO) {
-        int correctionalVertical = checkEdgeRow(r);
+        findCrossDot(r, c, XO);
+        return;
+
+        /*int correctionalVertical = checkRightHoriz(r);
         int correctionalHorizontal = checkEdgeColumn(c);
-        int correctionalFigure;
+        int[] correctionalFigure = new int[2];
         if (correctionalHorizontal < correctionalVertical) {
-            correctionalFigure =correctionalHorizontal;
+            correctionalFigure = correctionalHorizontal;
         }
         else {
             correctionalFigure = correctionalVertical;
@@ -222,14 +227,14 @@ public class TicTacToe {
             int tempRow = r - countDotToWin ;
             if (correctionalFigure < 0){
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow - correctionalFigure - 1 + j][tempCol - correctionalFigure - 1 + j] == XO){
+                    if (map[tempRow - correctionalFigure + j + i][tempCol - correctionalFigure + j + i] == XO){
                         countDot++;
                     }
                 }
             }
             else {
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow + j][tempCol + j] == XO){
+                    if (map[tempRow + j + i][tempCol + j + i] == XO){
                         countDot++;
                     }
                 }
@@ -237,8 +242,90 @@ public class TicTacToe {
             if (countDot == countDotToWin){
                 System.out.println("Победил " + XO);
             }
-        }
+        }*/
     }
+
+/*    private int[] checkDiagonale (int r, int c){
+        checkDotEdges();
+    }*/
+
+
+    //Метод проверяет, пересекает ли выиграшная диагональ сразу обе грани
+    private boolean checkDotEdges(int r, int c) {
+        boolean result = false;
+        if (((c - countDotToWin) < 0) || ((columns - c) <= (countDotToWin - 1))) {
+            if (((r - countDotToWin) < 0) || ((rows - r) <= (countDotToWin - 1))){
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public boolean findCrossDot (int r, int c, char XO) {
+        boolean result = false;
+        int x1, y1, x2, y2, countLeft, countRight;
+        double lenght;
+        countLeft = 0;
+        countRight = 0;
+        y1 = y2 = r;
+        x1 = x2 = c;
+        while ((x1 != 1 || y1 != 1) && countLeft != (countDotToWin - 1)){
+            x1--;
+            y1--;
+            countLeft++;
+        }
+        while ((x2 != columns || y2 != rows) && countRight != (countDotToWin - 1)) {
+            x1++;
+            y1++;
+            countRight++;
+        }
+        lenght = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
+        if (lenght <=
+                countDotToWin) {
+            result = true;
+            return result;
+        }
+
+        //////////////
+        do {
+            int countForWin = 0;
+            for (int i = 0; i < countDotToWin; i++) {
+                if (map[x1-1][y1-1] == XO) {
+                    countForWin++;
+                }
+            }
+            if (countForWin == countDotToWin) {
+                System.out.println("ПОБЕДА по главной диагонали!!!");
+                x1++;
+                y1++;
+            }
+        }while (x1!=x2 ||y1!=y2);
+            return result;
+
+    }
+
+/*        private boolean checkDotEdges(int r, int c) {
+            boolean result = false;
+            if (((c - countDotToWin) < 0) || ((columns - c) <= (countDotToWin - 1))) {
+                if (((r - countDotToWin) < 0) || ((rows - r) <= (countDotToWin - 1))){
+                    result = true;
+                }
+            }
+            return result;
+        }
+    }*/
+
+    private int[] checkRightHoriz(int r, int c) {
+        int[] dot = new int[2];
+        if ((c - countDotToWin) < 0) {
+            if ((columns - c) <= (countDotToWin - 1)) {
+                dot[1] = (countDotToWin - 1) - (columns - c);
+                dot[0] = c - countDotToWin;
+            }
+        }
+        return dot;
+    }
+
     private void checkSecondaryDiagonale(int r, int c, char XO) {
         int correctionalVertical = checkEdgeRow(r);
         int correctionalHorizontal = checkEdgeColumn(c);
