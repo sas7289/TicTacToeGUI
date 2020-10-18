@@ -209,7 +209,7 @@ public class TicTacToe {
 
 
     private void checkMainDiagonale(int r, int c, char XO) {
-        findCrossDot(r, c, XO);
+        checkMainDiagonal(r, c, XO);
         return;
 
         /*int correctionalVertical = checkRightHoriz(r);
@@ -261,47 +261,73 @@ public class TicTacToe {
         return result;
     }
 
-    public boolean findCrossDot (int r, int c, char XO) {
+    public void checkMainDiagonal(int r, int c, char XO) {
         boolean result = false;
-        int x1, y1, x2, y2, countLeft, countRight;
         double lenght;
-        countLeft = 0;
-        countRight = 0;
-        y1 = y2 = r;
-        x1 = x2 = c;
-        while ((x1 != 1 && y1 != 1) && countLeft != (countDotToWin - 1)){
-            x1--;
-            y1--;
-            countLeft++;
-        }
-        while ((x2 != columns && y2 != rows) && countRight != (countDotToWin - 1)) {
-            x2++;
-            y2++;
-            countRight++;
-        }
-        lenght = x2 - x1 + 1;
+        int[] dotLeft = new int[2];
+        int[] dotRight = new int[2];
+        dotLeft[1] = dotRight[1] = r;// координаты Х точек
+        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        findMainTermianlDots(dotLeft, dotRight);
+        lenght = dotRight[0] - dotLeft[0] + 1;
         if (lenght < countDotToWin) {
-            result = true;
-            return result;
+            return;
         }
+        checkCountWinDots(dotLeft, dotRight, XO);
 
-        //////////////
+    }
+
+
+    private void checkCountWinDots (int[] dotLeft, int[] dotRight, char XO){
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
-                if (map[x1-1+i][y1-1+i] == XO) {
+                if (map[dotLeft[0]-1+i][dotLeft[1]-1+i] == XO) {
                     countForWin++;
                 }
             }
             if (countForWin == countDotToWin) {
                 System.out.println("ПОБЕДА по главной диагонали!!!");
             }
-            x1++;
-            y1++;
-        }while (x1+3<=x2 ||y1+3<=y2);
-            return result;
+            dotLeft[0]++;
+            dotLeft[1]++;
+        }while (dotLeft[0]+3<=dotRight[0] ||dotLeft[1]+3<=dotRight[1]);
+    }
+
+    private void findMainTermianlDots(int[] dotLeft, int[] dotRight) {
+        int countLeft = 0;
+        int countRight = 0;
+        while ((dotLeft[0] != 1 && dotLeft[1] != 1) && countLeft != (countDotToWin - 1)){
+            dotLeft[0]--;
+            dotLeft[1]--;
+            countLeft++;
+        }
+        while ((dotRight[0] != columns && dotRight[1] != rows) && countRight != (countDotToWin - 1)) {
+            dotRight[0]++;
+            dotRight[1]++;
+            countRight++;
+        }
+    }
+
+    public void checkSecondaryDiagonal(int r, int c, char XO) {
+        boolean result = false;
+        double lenght;
+        int[] dotLeft = new int[2];
+        int[] dotRight = new int[2];
+        dotLeft[1] = dotRight[1] = r;// координаты Х точек
+        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        findMainTermianlDots(dotLeft, dotRight);
+        lenght = dotRight[0] - dotLeft[0] + 1;
+        if (lenght < countDotToWin) {
+            return;
+        }
+        checkCountWinDots(dotLeft, dotRight, XO);
 
     }
+
+
+
+
 
 /*        private boolean checkDotEdges(int r, int c) {
             boolean result = false;
