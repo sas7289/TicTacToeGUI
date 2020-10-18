@@ -111,7 +111,9 @@ public class TicTacToe {
     private boolean checkEndGame(int r, int c, char XO){
         boolean result = false;
         checkHorizonLine(r, c, XO);
-        //checkVerticalLine(r, c, XO);
+        checkVerticalLine(r, c, XO);
+        //checkMainDiagonale(r, c, XO);
+        //checkSecondaryDiagonale(r, c, XO);
 
 
 
@@ -130,14 +132,14 @@ public class TicTacToe {
             int tempCol = c - countDotToWin + 1;
             if (correctionFigure < 0){
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[r - 1][tempCol - correctionFigure - 1] == XO){
+                    if (map[r - 1][tempCol - correctionFigure + j] == XO){
                         countDot++;
                     }
                 }
             }
             else {
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[r - 1][tempCol - 1] == XO){
+                    if (map[r - 1][tempCol + j] == XO){
                         countDot++;
                     }
                 }
@@ -150,10 +152,11 @@ public class TicTacToe {
         return result;
     }
 
+    
     private int checkEdgeRow(int r){
         int countMarksOutOfMap = 0;
         if ((rows - r) >= (countDotToWin - 1)){
-            if ((r - (countDotToWin - 1)) < 0){
+            if ((r - countDotToWin) < 0){
                 countMarksOutOfMap = r - countDotToWin;
             }
         }
@@ -165,7 +168,7 @@ public class TicTacToe {
     private int checkEdgeColumn(int c){
         int countMarksOutOfMap = 0;
         if ((columns - c) >= (countDotToWin - 1)){
-            if ((c - (countDotToWin - 1)) < 0){
+            if ((c - countDotToWin) < 0){
                 countMarksOutOfMap = c - countDotToWin;
             }
         }
@@ -190,7 +193,7 @@ public class TicTacToe {
                 }
                 else {
                     for (int j = 0; j < countDotToWin; j++){
-                        if (map[tempRow][r - 1] == XO){
+                        if (map[tempRow][c - 1] == XO){
                             countDot++;
                         }
                     }
@@ -214,18 +217,18 @@ public class TicTacToe {
         }
         for (int i = 0; i < countDotToWin - Math.abs(correctionalFigure); i++){
             int countDot = 0;
-            int tempCol = c - countDotToWin + 1;
-            int tempRow = r - countDotToWin + 1;
+            int tempCol = c - countDotToWin ;
+            int tempRow = r - countDotToWin ;
             if (correctionalFigure < 0){
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow - 1][tempRow - correctionalFigure - 1] == XO){
+                    if (map[tempRow - correctionalFigure - 1 + j][tempCol - correctionalFigure - 1 + j] == XO){
                         countDot++;
                     }
                 }
             }
             else {
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[r][tempRow] == XO){
+                    if (map[tempRow + j][tempCol + j] == XO){
                         countDot++;
                     }
                 }
@@ -236,13 +239,31 @@ public class TicTacToe {
         }
     }
     private void checkSecondaryDiagonale(int r, int c, char XO) {
-        for (int i = 0; i < countDotToWin; i++){
+        int correctionalVertical = checkEdgeRow(r);
+        int correctionalHorizontal = checkEdgeColumn(c);
+        int correctionalFigure;
+        if (correctionalHorizontal < correctionalVertical) {
+            correctionalFigure = correctionalHorizontal;
+        }
+        else {
+            correctionalFigure = correctionalVertical;
+        }
+        for (int i = 0; i < countDotToWin - Math.abs(correctionalFigure); i++){
             int countDot = 0;
-            int tempCol = c - countDotToWin + 1;
-            int tempRow = r - countDotToWin + 1;
-            for (int j = 0; j < countDotToWin; j++){
-                if (map[tempRow][tempCol + j] == XO){
-                    countDot++;
+            int tempCol = c - countDotToWin + correctionalFigure;
+            int tempRow = r + countDotToWin - 2 - correctionalFigure;
+            if (correctionalFigure < 0){
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[tempRow - correctionalFigure - 1 + j][tempCol - correctionalFigure - 1 + j] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[tempRow - j][tempCol + j] == XO){
+                        countDot++;
+                    }
                 }
             }
             if (countDot == countDotToWin){
@@ -274,6 +295,8 @@ public class TicTacToe {
             c = randomCol.nextInt(columns);
         }
         map[r][c] = OX;
+        r++;
+        c++;
         checkEndGame(r, c, OX);
     }
 }
