@@ -269,19 +269,18 @@ public class TicTacToe {
         countRight = 0;
         y1 = y2 = r;
         x1 = x2 = c;
-        while ((x1 != 1 || y1 != 1) && countLeft != (countDotToWin - 1)){
+        while ((x1 != 1 && y1 != 1) && countLeft != (countDotToWin - 1)){
             x1--;
             y1--;
             countLeft++;
         }
-        while ((x2 != columns || y2 != rows) && countRight != (countDotToWin - 1)) {
-            x1++;
-            y1++;
+        while ((x2 != columns && y2 != rows) && countRight != (countDotToWin - 1)) {
+            x2++;
+            y2++;
             countRight++;
         }
-        lenght = Math.sqrt(Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2));
-        if (lenght <=
-                countDotToWin) {
+        lenght = x2 - x1 + 1;
+        if (lenght < countDotToWin) {
             result = true;
             return result;
         }
@@ -290,16 +289,16 @@ public class TicTacToe {
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
-                if (map[x1-1][y1-1] == XO) {
+                if (map[x1-1+i][y1-1+i] == XO) {
                     countForWin++;
                 }
             }
             if (countForWin == countDotToWin) {
                 System.out.println("ПОБЕДА по главной диагонали!!!");
-                x1++;
-                y1++;
             }
-        }while (x1!=x2 ||y1!=y2);
+            x1++;
+            y1++;
+        }while (x1+3<=x2 ||y1+3<=y2);
             return result;
 
     }
