@@ -127,19 +127,19 @@ public class TicTacToe {
     private boolean checkHorizonLine(int r, int c, char XO) {
         boolean result = false;
         int correctionFigure = checkEdgeColumn(c);
+        int tempCol = c - countDotToWin;
         for (int i = 0; i < countDotToWin - Math.abs(correctionFigure); i++){
             int countDot = 0;
-            int tempCol = c - countDotToWin + 1;
             if (correctionFigure < 0){
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[r - 1][tempCol - correctionFigure + j] == XO){
+                    if (map[r - 1][tempCol - correctionFigure + j + i] == XO){
                         countDot++;
                     }
                 }
             }
             else {
                 for (int j = 0; j < countDotToWin; j++){
-                    if (map[r - 1][tempCol + j] == XO){
+                    if (map[r - 1][tempCol + j + i] == XO){
                         countDot++;
                     }
                 }
@@ -147,12 +147,13 @@ public class TicTacToe {
             if (countDot == countDotToWin){
                 System.out.println("Победил " + XO);
                 result = true;
+                break;
             }
         }
         return result;
     }
 
-    
+
     private int checkEdgeRow(int r){
         int countMarksOutOfMap = 0;
         if ((rows - r) >= (countDotToWin - 1)){
@@ -183,17 +184,17 @@ public class TicTacToe {
         int correctionFigure = checkEdgeRow(r);
         for (int i = 0; i < countDotToWin - Math.abs(correctionFigure); i++){
             int countDot = 0;
-            int tempRow = r - countDotToWin + 1;
+            int tempRow = r - countDotToWin;
                 if (correctionFigure < 0){
                     for (int j = 0; j < countDotToWin; j++){
-                        if (map[tempRow - correctionFigure - 1][c - 1] == XO){
+                        if (map[tempRow - correctionFigure + j + i][c - 1] == XO){
                             countDot++;
                         }
                     }
                 }
                 else {
                     for (int j = 0; j < countDotToWin; j++){
-                        if (map[tempRow][c - 1] == XO){
+                        if (map[tempRow + j + i][c - 1] == XO){
                             countDot++;
                         }
                     }
