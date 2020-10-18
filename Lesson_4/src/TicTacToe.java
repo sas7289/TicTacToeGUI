@@ -1,3 +1,4 @@
+import java.util.Random;
 import java.util.Scanner;
 
 public class TicTacToe {
@@ -10,8 +11,8 @@ public class TicTacToe {
     int maxStep;
     final int COUNT_WIN_LINE = 4;
     final char DOT_EMPTY = '•';
-    final char DOT_X = 'X';
-    final char DOT_O = 'O';
+    final char[] DOT_XO = {'X','O'};
+    //final char DOT_O = 'O';
     final char FIRST_SYMBOL = 'Ϯ';
     final String EMPTY = " ";
 
@@ -91,98 +92,142 @@ public class TicTacToe {
         boolean endGame = false;
         while (!endGame) {
             move(first);
+            printMap();
         }
     }
 
     private void move(int first) {
+
+
         if (first%2 == step%2){
-            humanMove(DOT_X);
+            humanMove(DOT_XO[step%2]);
         }
         else {
-            aiMove(DOT_O);
+            aiMove(DOT_XO[step%2]);
         }
         step++;
     }
 
     private boolean checkEndGame(int r, int c, char XO){
+        boolean result = false;
         checkHorizonLine(r, c, XO);
+        //checkVerticalLine(r, c, XO);
+
 
 
         if (step == maxStep){
             System.out.println("Ничья!");
+            result = true;
         }
+        return result;
     }
 
-    private void checkHorizonLine(int r, int c, char XO) {
+    private boolean checkHorizonLine(int r, int c, char XO) {
+        boolean result = false;
         int correctionFigure = checkEdgeColumn(c);
-        for (int i = 0; i < countDotToWin; i++){
+        for (int i = 0; i < countDotToWin - Math.abs(correctionFigure); i++){
             int countDot = 0;
             int tempCol = c - countDotToWin + 1;
-            for (int j = 0 - correctionFigure; j < countDotToWin - correctionFigure; j++){
-                if (map[r][tempCol + j] == XO){
-                    countDot++;
+            if (correctionFigure < 0){
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[r - 1][tempCol - correctionFigure - 1] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[r - 1][tempCol - 1] == XO){
+                        countDot++;
+                    }
                 }
             }
             if (countDot == countDotToWin){
                 System.out.println("Победил " + XO);
+                result = true;
             }
         }
+        return result;
     }
 
     private int checkEdgeRow(int r){
-        int returnableNum;
-        if ((rows - 1 - r) >= countDotToWin - 1){
-            if ((r - countDotToWin + 1) >=0){
-                returnableNum = r;
-            }
-            else {
-                returnableNum = r - countDotToWin + 1;
+        int countMarksOutOfMap = 0;
+        if ((rows - r) >= (countDotToWin - 1)){
+            if ((r - (countDotToWin - 1)) < 0){
+                countMarksOutOfMap = r - countDotToWin;
             }
         }
         else {
-            returnableNum = rows - r;
+            countMarksOutOfMap = (countDotToWin - 1)  - (rows - r);
         }
-        return returnableNum;
+        return countMarksOutOfMap;
     }
     private int checkEdgeColumn(int c){
-        int returnableNum;
-        if ((columns - 1 - c) >= countDotToWin - 1){
-            if ((c - countDotToWin + 1) >=0){
-                returnableNum = c;
-            }
-            else {
-                returnableNum = c - countDotToWin + 1;
+        int countMarksOutOfMap = 0;
+        if ((columns - c) >= (countDotToWin - 1)){
+            if ((c - (countDotToWin - 1)) < 0){
+                countMarksOutOfMap = c - countDotToWin;
             }
         }
         else {
-            returnableNum = columns - c;
+            countMarksOutOfMap = (countDotToWin - 1)  - (columns - c);
         }
-        return returnableNum;
+        return countMarksOutOfMap;
     }
 
-    private void checkVerticalLine(int r, int c, char XO) {
+    private boolean checkVerticalLine(int r, int c, char XO) {
+        boolean result = false;
         int correctionFigure = checkEdgeRow(r);
-        for (int i = 0; i < countDotToWin; i++){
+        for (int i = 0; i < countDotToWin - Math.abs(correctionFigure); i++){
             int countDot = 0;
             int tempRow = r - countDotToWin + 1;
-            for (int j = 0 - correctionFigure; j < countDotToWin - correctionFigure; j++){
-                if (map[r][tempRow + j] == XO){
-                    countDot++;
+                if (correctionFigure < 0){
+                    for (int j = 0; j < countDotToWin; j++){
+                        if (map[tempRow - correctionFigure - 1][c - 1] == XO){
+                            countDot++;
+                        }
+                    }
                 }
-            }
+                else {
+                    for (int j = 0; j < countDotToWin; j++){
+                        if (map[tempRow][r - 1] == XO){
+                            countDot++;
+                        }
+                    }
+                }
             if (countDot == countDotToWin){
                 System.out.println("Победил " + XO);
+                result = true;
             }
         }
+        return result;
     }
     private void checkMainDiagonale(int r, int c, char XO) {
-        for (int i = 0; i < countDotToWin; i++){
+        int correctionalVertical = checkEdgeRow(r);
+        int correctionalHorizontal = checkEdgeColumn(c);
+        int correctionalFigure;
+        if (correctionalHorizontal < correctionalVertical) {
+            correctionalFigure =correctionalHorizontal;
+        }
+        else {
+            correctionalFigure = correctionalVertical;
+        }
+        for (int i = 0; i < countDotToWin - Math.abs(correctionalFigure); i++){
             int countDot = 0;
             int tempCol = c - countDotToWin + 1;
             int tempRow = r - countDotToWin + 1;
-            for (int j = 0; j < countDotToWin; j++){
-                if (map[tempRow][tempCol + j] == XO){
-                    countDot++;
+            if (correctionalFigure < 0){
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[tempRow - 1][tempRow - correctionalFigure - 1] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[r][tempRow] == XO){
+                        countDot++;
+                    }
                 }
             }
             if (countDot == countDotToWin){
@@ -211,11 +256,24 @@ public class TicTacToe {
         System.out.println("Введите значения строки и столбца");
         int r = scanner.nextInt();
         int c = scanner.nextInt();
-        map[r-1][c-1] = OX;
+        while (map[r - 1][c - 1] != DOT_EMPTY){
+            r = scanner.nextInt();
+            c = scanner.nextInt();
+        }
+        map[r - 1][c - 1] = OX;
+        checkEndGame(r, c, OX);
     }
 
     private void aiMove(char OX) {
-
-        //map[r-1][c-1] = OX;
+        Random randomRows = new Random();
+        Random randomCol = new Random();
+        int r = randomRows.nextInt(rows);
+        int c = randomCol.nextInt(columns);
+        while (map[r][c] != DOT_EMPTY){
+            r = randomRows.nextInt(rows);
+            c = randomCol.nextInt(columns);
+        }
+        map[r][c] = OX;
+        checkEndGame(r, c, OX);
     }
 }
