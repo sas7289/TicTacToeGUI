@@ -1,3 +1,4 @@
+import java.beans.PropertyEditorSupport;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -110,10 +111,10 @@ public class TicTacToe {
 
     private boolean checkEndGame(int r, int c, char XO){
         boolean result = false;
-        //checkHorizonLine(r, c, XO);
-        //checkVerticalLine(r, c, XO);
-        checkMainDiagonale(r, c, XO);
-        //checkSecondaryDiagonale(r, c, XO);
+        if (checkHorizonLine(r, c, XO) || checkVerticalLine(r, c, XO) || checkMainDiagonal(r, c, XO) ||
+                checkSecondaryDiagonal(r, c, XO)){
+            result = true;
+        }
 
 
 
@@ -208,47 +209,6 @@ public class TicTacToe {
     }
 
 
-    private void checkMainDiagonale(int r, int c, char XO) {
-        checkMainDiagonal(r, c, XO);
-        return;
-
-        /*int correctionalVertical = checkRightHoriz(r);
-        int correctionalHorizontal = checkEdgeColumn(c);
-        int[] correctionalFigure = new int[2];
-        if (correctionalHorizontal < correctionalVertical) {
-            correctionalFigure = correctionalHorizontal;
-        }
-        else {
-            correctionalFigure = correctionalVertical;
-        }
-        for (int i = 0; i < countDotToWin - Math.abs(correctionalFigure); i++){
-            int countDot = 0;
-            int tempCol = c - countDotToWin ;
-            int tempRow = r - countDotToWin ;
-            if (correctionalFigure < 0){
-                for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow - correctionalFigure + j + i][tempCol - correctionalFigure + j + i] == XO){
-                        countDot++;
-                    }
-                }
-            }
-            else {
-                for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow + j + i][tempCol + j + i] == XO){
-                        countDot++;
-                    }
-                }
-            }
-            if (countDot == countDotToWin){
-                System.out.println("Победил " + XO);
-            }
-        }*/
-    }
-
-/*    private int[] checkDiagonale (int r, int c){
-        checkDotEdges();
-    }*/
-
 
     //Метод проверяет, пересекает ли выиграшная диагональ сразу обе грани
     private boolean checkDotEdges(int r, int c) {
@@ -261,7 +221,7 @@ public class TicTacToe {
         return result;
     }
 
-    public void checkMainDiagonal(int r, int c, char XO) {
+    public boolean checkMainDiagonal(int r, int c, char XO) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
@@ -270,28 +230,31 @@ public class TicTacToe {
         dotLeft[0] = dotRight[0] = c;// координаты У точек
         findMainTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
-        if (lenght < countDotToWin) {
-            return;
+        if (lenght >= countDotToWin) {
+            result = checkCountMainWinDots(dotLeft, dotRight, XO);
         }
-        checkCountWinDots(dotLeft, dotRight, XO);
+        return result;
 
     }
 
 
-    private void checkCountWinDots (int[] dotLeft, int[] dotRight, char XO){
+    private boolean checkCountMainWinDots(int[] dotLeft, int[] dotRight, char XO){
+        boolean result =false;
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
-                if (map[dotLeft[0]-1+i][dotLeft[1]-1+i] == XO) {
+                if (map[dotLeft[1]-1+i][dotLeft[0]-1+i] == XO) {
                     countForWin++;
                 }
             }
             if (countForWin == countDotToWin) {
                 System.out.println("ПОБЕДА по главной диагонали!!!");
+                result = true;
             }
             dotLeft[0]++;
             dotLeft[1]++;
         }while (dotLeft[0]+3<=dotRight[0] ||dotLeft[1]+3<=dotRight[1]);
+        return  result;
     }
 
     private void findMainTermianlDots(int[] dotLeft, int[] dotRight) {
@@ -309,81 +272,57 @@ public class TicTacToe {
         }
     }
 
-    public void checkSecondaryDiagonal(int r, int c, char XO) {
+    public boolean checkSecondaryDiagonal(int r, int c, char XO) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
         dotLeft[1] = dotRight[1] = r;// координаты Х точек
         dotLeft[0] = dotRight[0] = c;// координаты У точек
-        findMainTermianlDots(dotLeft, dotRight);
+        findSecondaryTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
-        if (lenght < countDotToWin) {
-            return;
+        if (lenght >= countDotToWin) {
+            result = checkCountSecondaryWinDots(dotLeft, dotRight, XO);
         }
-        checkCountWinDots(dotLeft, dotRight, XO);
+        return  result;
 
     }
 
-
-
-
-
-/*        private boolean checkDotEdges(int r, int c) {
-            boolean result = false;
-            if (((c - countDotToWin) < 0) || ((columns - c) <= (countDotToWin - 1))) {
-                if (((r - countDotToWin) < 0) || ((rows - r) <= (countDotToWin - 1))){
-                    result = true;
-                }
-            }
-            return result;
+    private void findSecondaryTermianlDots(int[] dotLeft, int[] dotRight) {
+        int countLeft = 0;
+        int countRight = 0;
+        while ((dotLeft[0] != 1 && dotLeft[1] != rows) && countLeft != (countDotToWin - 1)){
+            dotLeft[0]--;
+            dotLeft[1]++;
+            countLeft++;
         }
-    }*/
-
-    private int[] checkRightHoriz(int r, int c) {
-        int[] dot = new int[2];
-        if ((c - countDotToWin) < 0) {
-            if ((columns - c) <= (countDotToWin - 1)) {
-                dot[1] = (countDotToWin - 1) - (columns - c);
-                dot[0] = c - countDotToWin;
-            }
-        }
-        return dot;
-    }
-
-    private void checkSecondaryDiagonale(int r, int c, char XO) {
-        int correctionalVertical = checkEdgeRow(r);
-        int correctionalHorizontal = checkEdgeColumn(c);
-        int correctionalFigure;
-        if (correctionalHorizontal < correctionalVertical) {
-            correctionalFigure = correctionalHorizontal;
-        }
-        else {
-            correctionalFigure = correctionalVertical;
-        }
-        for (int i = 0; i < countDotToWin - Math.abs(correctionalFigure); i++){
-            int countDot = 0;
-            int tempCol = c - countDotToWin + correctionalFigure;
-            int tempRow = r + countDotToWin - 2 - correctionalFigure;
-            if (correctionalFigure < 0){
-                for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow - correctionalFigure - 1 + j][tempCol - correctionalFigure - 1 + j] == XO){
-                        countDot++;
-                    }
-                }
-            }
-            else {
-                for (int j = 0; j < countDotToWin; j++){
-                    if (map[tempRow - j][tempCol + j] == XO){
-                        countDot++;
-                    }
-                }
-            }
-            if (countDot == countDotToWin){
-                System.out.println("Победил " + XO);
-            }
+        while ((dotRight[0] != columns && dotRight[1] != 1) && countRight != (countDotToWin - 1)) {
+            dotRight[0]++;
+            dotRight[1]--;
+            countRight++;
         }
     }
+
+    private boolean checkCountSecondaryWinDots(int[] dotLeft, int[] dotRight, char XO){
+        boolean result = false;
+        do {
+            int countForWin = 0;
+            for (int i = 0; i < countDotToWin; i++) {
+                if (map[dotLeft[1]-1-i][dotLeft[0]-1+i] == XO) {
+                    countForWin++;
+                }
+            }
+            if (countForWin == countDotToWin) {
+                System.out.println("ПОБЕДА по главной диагонали!!!");
+                result = true;
+            }
+            dotLeft[0]++;
+            dotLeft[1]--;
+        }while (dotLeft[0]+3<=dotRight[0] ||dotLeft[1]-3>=dotRight[1]);
+        return result;
+    }
+
+
 
 
     private void humanMove(char OX) {
@@ -399,17 +338,172 @@ public class TicTacToe {
     }
 
     private void aiMove(char OX) {
+        char Human;
+        if (step%2 == 0){
+            Human = DOT_XO[1];
+        }
+        else {
+            Human = DOT_XO[0];
+        }
+        int[] aiDot = aiMind(Human);
+
+        map[aiDot[0]][aiDot[1]] = OX;
+        checkEndGame(aiDot[0], aiDot[1], OX);
+    }
+
+
+    private int[] aiMind (char human){
+        int[] dot = new int[2];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if (map[i][j] == human){
+                    if (checkHumanWin(i+1, j+1, human)){
+                        dot[0] = i+1;
+                        dot[1] = j+1;
+                        return dot;
+                    }
+                }
+            }
+        }
         Random randomRows = new Random();
         Random randomCol = new Random();
-        int r = randomRows.nextInt(rows);
-        int c = randomCol.nextInt(columns);
-        while (map[r][c] != DOT_EMPTY){
-            r = randomRows.nextInt(rows);
-            c = randomCol.nextInt(columns);
+        dot[0] = randomRows.nextInt(rows) + 1;
+        dot[1] = randomCol.nextInt(columns) + 1;
+        while (map[dot[0]][dot[1]] != DOT_EMPTY){
+            dot[0] = randomRows.nextInt(rows) + 1;
+            dot[1] = randomCol.nextInt(columns) + 1;
         }
-        map[r][c] = OX;
-        r++;
-        c++;
-        checkEndGame(r, c, OX);
+        return dot;
+    }
+
+    private boolean checkHumanWin(int r, int c, char human) {
+        boolean result = false;
+        if (checkHorizonHuman(r, c, human) || checkVerticalHuman(r, c, human) || checkMainHumanDiagonal(r, c, human)
+                || checkSecondaryHumanDiagonal(r, c, human)){
+            result = true;
+        }
+        return result;
+    }
+
+
+
+    private boolean checkHorizonHuman(int r, int c, char XO) {
+        boolean result = false;
+        int correctionFigure = checkEdgeColumn(c);
+        int tempCol = c - countDotToWin;
+        for (int i = 0; i < countDotToWin - Math.abs(correctionFigure); i++){
+            int countDot = 0;
+            if (correctionFigure < 0){
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[r - 1][tempCol - correctionFigure + j + i] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[r - 1][tempCol + j + i] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            if (countDot == countDotToWin - 1){
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    private boolean checkVerticalHuman(int r, int c, char XO) {
+        boolean result = false;
+        int correctionFigure = checkEdgeRow(r);
+        for (int i = 0; i < countDotToWin - Math.abs(correctionFigure); i++){
+            int countDot = 0;
+            int tempRow = r - countDotToWin;
+            if (correctionFigure < 0){
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[tempRow - correctionFigure + j + i][c - 1] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            else {
+                for (int j = 0; j < countDotToWin; j++){
+                    if (map[tempRow + j + i][c - 1] == XO){
+                        countDot++;
+                    }
+                }
+            }
+            if (countDot == countDotToWin - 1){
+                result = true;
+            }
+        }
+        return result;
+    }
+
+    public boolean checkMainHumanDiagonal(int r, int c, char XO) {
+        boolean result = false;
+        double lenght;
+        int[] dotLeft = new int[2];
+        int[] dotRight = new int[2];
+        dotLeft[1] = dotRight[1] = r;// координаты Х точек
+        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        findMainTermianlDots(dotLeft, dotRight);
+        lenght = dotRight[0] - dotLeft[0] + 1;
+        if (lenght >= countDotToWin) {
+            result = checkCountHumanMainWinDots(dotLeft, dotRight, XO);
+        }
+        return result;
+    }
+
+    private boolean checkCountHumanMainWinDots(int[] dotLeft, int[] dotRight, char XO){
+        boolean result =false;
+        do {
+            int countForWin = 0;
+            for (int i = 0; i < countDotToWin; i++) {
+                if (map[dotLeft[1]-1+i][dotLeft[0]-1+i] == XO) {
+                    countForWin++;
+                }
+            }
+            if (countForWin == countDotToWin - 1) {
+                result = true;
+            }
+            dotLeft[0]++;
+            dotLeft[1]++;
+        }while (dotLeft[0]+3<=dotRight[0] ||dotLeft[1]+3<=dotRight[1]);
+        return  result;
+    }
+
+    public boolean checkSecondaryHumanDiagonal(int r, int c, char XO) {
+        boolean result = false;
+        double lenght;
+        int[] dotLeft = new int[2];
+        int[] dotRight = new int[2];
+        dotLeft[1] = dotRight[1] = r;// координаты Х точек
+        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        findSecondaryTermianlDots(dotLeft, dotRight);
+        lenght = dotRight[0] - dotLeft[0] + 1;
+        if (lenght >= countDotToWin) {
+            result = checkCountHumanSecondaryWinDots(dotLeft, dotRight, XO);
+        }
+        return  result;
+    }
+
+    private boolean checkCountHumanSecondaryWinDots(int[] dotLeft, int[] dotRight, char XO){
+        boolean result = false;
+        do {
+            int countForWin = 0;
+            for (int i = 0; i < countDotToWin; i++) {
+                if (map[dotLeft[1]-1-i][dotLeft[0]-1+i] == XO) {
+                    countForWin++;
+                }
+            }
+            if (countForWin == countDotToWin - 1) {
+                result = true;
+            }
+            dotLeft[0]++;
+            dotLeft[1]--;
+        }while (dotLeft[0]+3<=dotRight[0] ||dotLeft[1]-3>=dotRight[1]);
+        return result;
     }
 }
