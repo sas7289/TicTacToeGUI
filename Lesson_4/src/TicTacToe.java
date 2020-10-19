@@ -197,7 +197,7 @@ public class TicTacToe {
             return;
         }
         List<int[]> coastDots = new ArrayList<>();
-        int[] dot = new int[4];
+        int[] dot = new int[4];//0 - строка 1 - столбец 2 - линия, по которой большая цена 3 - наибольшая цена для данной точки
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 if (map[i][j] == markHuman){
@@ -215,6 +215,7 @@ public class TicTacToe {
 
     }
 
+
     private boolean checkEndGame(int r, int c, char XO){
         boolean result = false;
         if (checkHorizonLine(r, c, XO) || checkVerticalLine(r, c, XO) || checkMainDiagonal(r, c, XO) ||
@@ -228,6 +229,7 @@ public class TicTacToe {
         return result;
     }
 
+    //Проверяет горизонтальную линию на наличие победной комбинации
     private boolean checkHorizonLine(int r, int c, char XO) {
         boolean result = false;
         int left, right, countWinDot;
@@ -259,7 +261,7 @@ public class TicTacToe {
 
 
 
-
+    //Проверяет вериткальую линию на наличие победной комбинации
     private boolean checkVerticalLine(int r, int c, char XO) {
         boolean result = false;
         int up, down, countWinDot;
@@ -289,7 +291,7 @@ public class TicTacToe {
         return result;
     }
 
-
+    //Вызывает необходимые методы для проверки главной диагонали на наличие победной комбинации
     public boolean checkMainDiagonal(int r, int c, char XO) {
         boolean result = false;
         double lenght;
@@ -306,9 +308,9 @@ public class TicTacToe {
 
     }
 
-
+    //Проверяет, есть ли необходимое количество меток для победы
     private boolean checkCountMainWinDots(int[] dotLeft, int[] dotRight, char XO){
-        boolean result =false;
+        boolean result = false;
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
@@ -326,6 +328,7 @@ public class TicTacToe {
         return  result;
     }
 
+    //Находит крайние точки для всех комбинаций
     private void findMainTermianlDots(int[] dotLeft, int[] dotRight) {
         int countLeft = 0;
         int countRight = 0;
@@ -341,6 +344,7 @@ public class TicTacToe {
         }
     }
 
+    //Проверяет побочную диагональ на наличие победной комбинации
     public boolean checkSecondaryDiagonal(int r, int c, char XO) {
         boolean result = false;
         double lenght;
@@ -357,6 +361,7 @@ public class TicTacToe {
 
     }
 
+    //Находит крайние точки для всех комбинаций
     private void findSecondaryTermianlDots(int[] dotLeft, int[] dotRight) {
         int countLeft = 0;
         int countRight = 0;
@@ -372,6 +377,7 @@ public class TicTacToe {
         }
     }
 
+    //Проверяет, есть ли необходимое количество меток для победы
     private boolean checkCountSecondaryWinDots(int[] dotLeft, int[] dotRight, char XO){
         boolean result = false;
         do {
@@ -395,6 +401,7 @@ public class TicTacToe {
 
 
 
+    //Находит в списке точку игра с наибольшей ценой
     private void findTargetDot(List<int[]> coastDots) {
         int maxPos = 0;
         int maxCoast = 0;
@@ -408,6 +415,7 @@ public class TicTacToe {
     }
 
 
+    //Находит по какой линии большая цена
     private int findMaxCoastPosition(int[][] arr) {
         int pos = 0;
         int max = 0;
@@ -420,6 +428,7 @@ public class TicTacToe {
         return pos;
     }
 
+    //Проверяет ходы игрока на предмет препятсвия его победе
     private int[] checkHumanWinLine(int r, int c) {
         int[][] coastDot = new int[4][3];
         boolean result = false;
@@ -447,6 +456,7 @@ public class TicTacToe {
         return maxCoast;
     }
 
+    //Находит максимальную стоимость для выигрышной линии
     private int findMaxCoast(int[][] coastDot) {
         int pos = 0;
         int max = 0;
@@ -460,6 +470,7 @@ public class TicTacToe {
     }
 
 
+    //Проверяет метку игрока по горизонтольной линии
     private int[] checkHorizonHuman(int r, int c) {
         boolean result = false;
         int maxCountWin = 0;
@@ -500,6 +511,7 @@ public class TicTacToe {
         map[r][c] = markAi;
     }
 
+    //Проверяет метку игрока по вертикальной линии
     private int[] checkVerticalHuman(int r, int c) {
         int maxCountWin = 0;
         int[] maxDot= new int[3];
@@ -533,39 +545,25 @@ public class TicTacToe {
         return maxDot;
     }
 
-    private void findDotToStopHumanVertical(int up, int c) {
-        while (map[up][c] != DOT_EMPTY){
-            up++;
-        }
-        map[up][c] = markAi;
-    }
-
+    //Проверяет метку игрока по главной диагонали
     public int[] checkMainHumanDiagonal(int r, int c) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
-        dotLeft[0] = dotRight[0] = r;// координаты Х точек
-        dotLeft[1] = dotRight[1] = c;// координаты У точек
+        dotLeft[0] = dotRight[0] = r;
+        dotLeft[1] = dotRight[1] = c;
         findMainTermianlDots(dotLeft, dotRight);
         lenght = Math.abs(dotRight[0] - dotLeft[0]) + 1;
-        int[] targetDot = new int[2];
         if (lenght >= countDotToWin) {
-            return checkCountHumanMainWinDots(dotLeft, dotRight, targetDot);
+            return checkCountHumanMainWinDots(dotLeft, dotRight);
         }
         return new int[3];
     }
 
-    private void findDotToStopHumanMainDiagonal(int[] targetDot) {
-        while (map[targetDot[0]][targetDot[1]] != DOT_EMPTY){
-            targetDot[0]++;
-            targetDot[1]++;
-        }
-        map[targetDot[0]][targetDot[1]] = markAi;
-    }
 
-    private int[] checkCountHumanMainWinDots(int[] dotLeft, int[] dotRight, int[] targetDot){
-        boolean result = false;
+    //Возвращает точку игрока с наибольшой ценой
+    private int[] checkCountHumanMainWinDots(int[] dotLeft, int[] dotRight){
         int[] maxDot = new int[3];
         do {
             int countForWin = 0;
@@ -585,6 +583,7 @@ public class TicTacToe {
         return  maxDot;
     }
 
+    //Проверяет метку игрока на побочной диагонали
     public int[] checkSecondaryHumanDiagonal(int r, int c) {
         boolean result = false;
         double lenght;
@@ -600,6 +599,7 @@ public class TicTacToe {
         return new int[3];
     }
 
+    //Возвращает точку игрока с наибольшой ценой
     private int[] checkCountHumanSecondaryWinDots(int[] dotLeft, int[] dotRight){
         int maxCoast = 0;
         int[] maxDot= new int[3];
@@ -622,6 +622,8 @@ public class TicTacToe {
         return maxDot;
     }
 
+
+    //Ставит метку АИ на необоходимой линии
     private void setMarkAi (int[] dot){
         switch (dot[2]){
             case 0: setMarkHorizon(dot);
@@ -635,6 +637,7 @@ public class TicTacToe {
         }
     }
 
+    
     private void setMarkSecondaryDiagonal(int[] dot) {
         int r = dot[0];
         int c = dot[1];
