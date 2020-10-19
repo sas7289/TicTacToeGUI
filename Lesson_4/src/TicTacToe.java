@@ -305,14 +305,14 @@ public class TicTacToe {
     private void findSecondaryTermianlDots(int[] dotLeft, int[] dotRight) {
         int countLeft = 0;
         int countRight = 0;
-        while ((dotLeft[0] != 0 && dotLeft[1] != rows - 1) && countLeft != (countDotToWin - 0)){
-            dotLeft[0]--;
-            dotLeft[1]++;
+        while ((dotLeft[0] != rows - 1  && dotLeft[1] != 0) && countLeft != (countDotToWin - 1)){
+            dotLeft[0]++;
+            dotLeft[1]--;
             countLeft++;
         }
-        while ((dotRight[0] != columns - 1 && dotRight[1] != 0) && countRight != (countDotToWin - 1)) {
-            dotRight[0]++;
-            dotRight[1]--;
+        while ((dotRight[0] != 0 && dotRight[1] != columns - 1) && countRight != (countDotToWin - 1)) {
+            dotRight[0]--;
+            dotRight[1]++;
             countRight++;
         }
     }
@@ -362,9 +362,10 @@ public class TicTacToe {
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
                 if (map[i][j] == markHuman){
-                    dot[0] = i;
-                    dot[1] = j;
-                    dot[2] = checkHumanWinLine(i, j);//0 - horizon; 1 - vertical; 2 - mainD; 3- secondaryD
+                    int[] temp = checkHumanWinLine(i, j);//0 - horizon; 1 - vertical; 2 - mainD; 3- secondaryD
+                    dot[0] = temp[0];
+                    dot[1] = temp[1];
+                    dot[2] = temp[2];
                     dot[3] = getMaxCoast(i, j);//возвращает стоимость этой точки
                     coastDots.add(dot);
                 }
@@ -419,15 +420,21 @@ public class TicTacToe {
         return pos;
     }
 
-    private int checkHumanWinLine(int r, int c) {
+    private int[] checkHumanWinLine(int r, int c) {
         int[][] coastDot = new int[4][3];
         boolean result = false;
+        int[] temp = new int[4];
         coastDot[0] = checkHorizonHuman(r, c);
         coastDot[1] = checkVerticalHuman(r, c);
         coastDot[2] = checkMainHumanDiagonal(r, c);
         coastDot[3] = checkSecondaryHumanDiagonal(r, c);
         int pos = findMaxCoastPosition(coastDot);
-        return pos;
+        temp[0] = coastDot[pos][0];
+        temp[1] = coastDot[pos][1];
+        temp[2] = pos;
+        temp[3] = coastDot[pos][2];
+
+        return temp;
     }
     private int getMaxCoast(int r, int c) {
         int[][] coastDot = new int[4][3];
@@ -538,10 +545,10 @@ public class TicTacToe {
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
-        dotLeft[1] = dotRight[1] = r;// координаты Х точек
-        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        dotLeft[0] = dotRight[0] = r;// координаты Х точек
+        dotLeft[1] = dotRight[1] = c;// координаты У точек
         findMainTermianlDots(dotLeft, dotRight);
-        lenght = dotRight[0] - dotLeft[0] + 1;
+        lenght = Math.abs(dotRight[0] - dotLeft[0]) + 1;
         int[] targetDot = new int[2];
         if (lenght >= countDotToWin) {
             return checkCountHumanMainWinDots(dotLeft, dotRight, targetDot);
@@ -563,7 +570,7 @@ public class TicTacToe {
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
-                if (map[dotLeft[1]+i][dotLeft[0]+i] == markHuman) {
+                if (map[dotLeft[0]+i][dotLeft[1]+i] == markHuman) {
                     countForWin++;
                 }
             }
@@ -583,10 +590,10 @@ public class TicTacToe {
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
-        dotLeft[1] = dotRight[1] = r;// координаты Х точек
-        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        dotLeft[0] = dotRight[0] = r;// координаты Х точек
+        dotLeft[1] = dotRight[1] = c;// координаты У точек
         findSecondaryTermianlDots(dotLeft, dotRight);
-        lenght = dotRight[0] - dotLeft[0] + 1;
+        lenght = Math.abs(dotRight[0] - dotLeft[0]) + 1;
         if (lenght >= countDotToWin) {
             return checkCountHumanSecondaryWinDots(dotLeft, dotRight);
         }
@@ -600,7 +607,7 @@ public class TicTacToe {
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
-                if (map[dotLeft[1]-i][dotLeft[0]+i] == markHuman) {
+                if (map[dotLeft[0]-i][dotLeft[1]+i] == markHuman) {
                     countForWin++;
                 }
             }
@@ -609,8 +616,8 @@ public class TicTacToe {
                 maxDot[0] = dotLeft[0];
                 maxDot[1] = dotLeft[1];
             }
-            dotLeft[0]++;
-            dotLeft[1]--;
+            dotLeft[0]--;
+            dotLeft[1]++;
         }while (dotLeft[0]+countDotToWin - 1<=dotRight[0] ||dotLeft[1]-3>=dotRight[1]);
         return maxDot;
     }
