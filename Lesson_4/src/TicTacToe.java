@@ -1,8 +1,8 @@
 import java.util.*;
 
 public class TicTacToe {
+    Random random = new Random();
     char markHuman, markAi;
-    int size;
     int rows;
     int columns;
     char[][] map;
@@ -14,7 +14,6 @@ public class TicTacToe {
     final char[] DOT_XO = {'X','O'};
     final char DOT_X = 'X';
     final char DOT_O = 'O';
-    //final char DOT_O = 'O';
     final char FIRST_SYMBOL = 'Ϯ';
     final String EMPTY = " ";
 
@@ -22,20 +21,40 @@ public class TicTacToe {
 
 
     public TicTacToe (){
-        System.out.println("Введите размер поля");
-        rows = scanner.nextInt();//Проверить на правильность ввода!!!
+        inputRow();
+        inputColumn();
+    }
+
+    private void inputColumn() {
+        System.out.print("Количество столбцов: ");
+        while (!scanner.hasNextInt()){
+            System.out.print("Не по тем кнопкам попадаешь, прицелься получше\nКоличество столбцов:");
+            scanner.next();
+        }
         columns = scanner.nextInt();
     }
+
+    private void inputRow() {
+        System.out.print("Введите размер поля\nКоличество строк: ");
+        while (!scanner.hasNextInt()){
+            System.out.print("Не по тем кнопкам попадаешь, пробуй ещё разок\nКоличество строк: ");
+            scanner.next();
+        }
+        rows = scanner.nextInt();
+    }
+
     public TicTacToe (int row, int col){
         rows = row;
         columns = col;
     }
 
     public void turnGame() {
-        initNum();
-        initMap();
-        printMap();
-        playGame();
+        while(true) {
+            initNum();
+            initMap();
+            printMap();
+            playGame();
+        }
     }
 
     private void initNum() {
@@ -89,14 +108,32 @@ public class TicTacToe {
     }
 
     private void playGame() {
-        System.out.println("Кто ходит первым?\n1. Конечно же я\n2. Дадим шанс железке");
-        int first = scanner.nextInt() - 1;
-        setMarks(first);
+        int firstStep = stepPriority();
+        setMarks(firstStep);
         boolean endGame = false;
         while (!endGame) {
-            move(first);
+            move(firstStep);
             printMap();
         }
+        System.out.print("1. Начать сначада\n2. Выход из игры\nChoose your destiny: ");
+        while(!scanner.hasNextInt()){
+            System.out.println("Одно из двух, красная или синия...");
+            scanner.next();
+        }
+        switch (scanner.nextInt()){
+            case 1:
+                break;
+            case 2:System.exit(0);
+        }
+    }
+
+    private int stepPriority() {
+        System.out.println("Кто ходит первым?\n1. Конечно же я\n2. Дадим шанс железке");
+        while (!scanner.hasNext()){
+            System.out.println("Выбор небольшой, попробуй ещё раз");
+            scanner.next();
+        }
+        return scanner.nextInt() - 1;
     }
 
     private void setMarks(int first) {
@@ -111,8 +148,6 @@ public class TicTacToe {
     }
 
     private void move(int first) {
-
-
         if (first%2 == step%2){
             humanMove();
         }
@@ -122,15 +157,70 @@ public class TicTacToe {
         step++;
     }
 
+    private void humanMove() {
+        int r = humanRow();
+        int c = humanColumn();
+        while (map[r][c] != DOT_EMPTY){
+            System.out.println("Выбранная ячейка занята, выбери другую");
+            r = humanRow();
+            c = humanColumn();
+        }
+        map[r][c] = markHuman;
+        checkEndGame(r, c, markHuman);
+    }
+
+    private int humanColumn() {
+        System.out.print("Введите значения столбца\nСтолбец: ");
+        while (!scanner.hasNext()){
+            System.out.println("Выбор небольшой, попробуй ещё раз\nСтолбец: ");
+            scanner.next();
+        }
+        return scanner.nextInt() - 1;
+    }
+
+    private int humanRow() {
+        System.out.print("Введите значения строки\nСтрока: ");
+        while (!scanner.hasNext()){
+            System.out.println("Выбор небольшой, попробуй ещё раз\nСтрока: ");
+            scanner.next();
+        }
+        return scanner.nextInt() - 1;
+    }
+
+    private void aiMove() {
+        aiMind();
+    }
+
+    private void aiMind (){
+        if (step == 0){
+            map[random.nextInt(rows)][random.nextInt(columns)] = markAi;
+            return;
+        }
+        List<int[]> coastDots = new ArrayList<>();
+        int[] dot = new int[4];
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if (map[i][j] == markHuman){
+                    int[] temp = checkHumanWinLine(i, j);//0 - horizon; 1 - vertical; 2 - mainD; 3- secondaryD
+                    dot[0] = temp[0];
+                    dot[1] = temp[1];
+                    dot[2] = temp[2];
+                    dot[3] = getMaxCoast(i, j);//возвращает стоимость этой точки
+                    coastDots.add(dot);
+                }
+            }
+        }
+        findTargetDot(coastDots);
+
+
+    }
+
     private boolean checkEndGame(int r, int c, char XO){
         boolean result = false;
         if (checkHorizonLine(r, c, XO) || checkVerticalLine(r, c, XO) || checkMainDiagonal(r, c, XO) ||
                 checkSecondaryDiagonal(r, c, XO)){
             result = true;
         }
-
-
-
         if (step == maxStep){
             System.out.println("Ничья!");
             result = true;
@@ -168,30 +258,7 @@ public class TicTacToe {
     }
 
 
-    private int checkEdgeRow(int r){
-        int countMarksOutOfMap = 0;
-        if ((rows - r) >= (countDotToWin - 1)){
-            if ((r - countDotToWin) < 0){
-                countMarksOutOfMap = r - countDotToWin;
-            }
-        }
-        else {
-            countMarksOutOfMap = (countDotToWin - 1)  - (rows - r);
-        }
-        return countMarksOutOfMap;
-    }
-    private int checkEdgeColumn(int c){
-        int countMarksOutOfMap = 0;
-        if ((columns - c) >= (countDotToWin - 1)){
-            if ((c - countDotToWin) < 0){
-                countMarksOutOfMap = c - countDotToWin;
-            }
-        }
-        else {
-            countMarksOutOfMap = (countDotToWin - 1)  - (columns - c);
-        }
-        return countMarksOutOfMap;
-    }
+
 
     private boolean checkVerticalLine(int r, int c, char XO) {
         boolean result = false;
@@ -223,25 +290,13 @@ public class TicTacToe {
     }
 
 
-
-    //Метод проверяет, пересекает ли выиграшная диагональ сразу обе грани
-    private boolean checkDotEdges(int r, int c) {
-        boolean result = false;
-        if (((c - countDotToWin) < 0) || ((columns - c) <= (countDotToWin - 1))) {
-            if (((r - countDotToWin) < 0) || ((rows - r) <= (countDotToWin - 1))){
-                result = true;
-            }
-        }
-        return result;
-    }
-
     public boolean checkMainDiagonal(int r, int c, char XO) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
-        dotLeft[0] = dotRight[0] = r;// координаты Х точек
-        dotLeft[1] = dotRight[1] = c;// координаты У точек
+        dotLeft[0] = dotRight[0] = r;
+        dotLeft[1] = dotRight[1] = c;
         findMainTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
         if (lenght >= countDotToWin) {
@@ -339,42 +394,6 @@ public class TicTacToe {
 
 
 
-    private void humanMove() {
-        System.out.println("Введите значения строки и столбца");
-        int r = scanner.nextInt() - 1;
-        int c = scanner.nextInt() - 1;
-        while (map[r][c] != DOT_EMPTY){
-            r = scanner.nextInt() - 1;
-            c = scanner.nextInt() - 1;
-        }
-        map[r][c] = markHuman;
-        checkEndGame(r, c, markHuman);
-    }
-
-    private void aiMove() {
-        aiMind();
-    }
-
-
-    private void aiMind (){
-        List<int[]> coastDots = new ArrayList<>();
-        int[] dot = new int[4];
-        for (int i = 0; i < rows; i++) {
-            for (int j = 0; j < columns; j++) {
-                if (map[i][j] == markHuman){
-                    int[] temp = checkHumanWinLine(i, j);//0 - horizon; 1 - vertical; 2 - mainD; 3- secondaryD
-                    dot[0] = temp[0];
-                    dot[1] = temp[1];
-                    dot[2] = temp[2];
-                    dot[3] = getMaxCoast(i, j);//возвращает стоимость этой точки
-                    coastDots.add(dot);
-                }
-            }
-        }
-        findTargetDot(coastDots);
-
-
-    }
 
     private void findTargetDot(List<int[]> coastDots) {
         int maxPos = 0;
