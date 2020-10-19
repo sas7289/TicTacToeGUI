@@ -163,7 +163,7 @@ public class TicTacToe {
                 result = true;
             }
             left++;
-        } while ((left + countDotToWin - 1) <= countDotToWin - 1);
+        } while ((left + countDotToWin - 1) <= right);
         return result;
     }
 
@@ -218,7 +218,7 @@ public class TicTacToe {
                 result = true;
             }
             up++;
-        } while ((up + countDotToWin - 1) <= countDotToWin - 1);
+        } while ((up + countDotToWin - 1) <= down);
         return result;
     }
 
@@ -240,8 +240,8 @@ public class TicTacToe {
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
-        dotLeft[1] = dotRight[1] = r;// координаты Х точек
-        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        dotLeft[0] = dotRight[0] = r;// координаты Х точек
+        dotLeft[1] = dotRight[1] = c;// координаты У точек
         findMainTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
         if (lenght >= countDotToWin) {
@@ -291,8 +291,8 @@ public class TicTacToe {
         double lenght;
         int[] dotLeft = new int[2];
         int[] dotRight = new int[2];
-        dotLeft[1] = dotRight[1] = r;// координаты Х точек
-        dotLeft[0] = dotRight[0] = c;// координаты У точек
+        dotLeft[0] = dotRight[0] = r;// координаты Х точек
+        dotLeft[1] = dotRight[1] = c;// координаты У точек
         findSecondaryTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
         if (lenght >= countDotToWin) {
@@ -373,14 +373,6 @@ public class TicTacToe {
         }
         findTargetDot(coastDots);
 
-   /*     Random randomRows = new Random();
-        Random randomCol = new Random();
-        dot[0] = randomRows.nextInt(rows) + 1;
-        dot[1] = randomCol.nextInt(columns) + 1;
-        while (map[dot[0]][dot[1]] != DOT_EMPTY){
-            dot[0] = randomRows.nextInt(rows) + 1;
-            dot[1] = randomCol.nextInt(columns) + 1;
-        }*/
 
     }
 
@@ -396,17 +388,6 @@ public class TicTacToe {
         setMarkAi(coastDots.get(maxPos));
     }
 
-/*    private int[] findMaxCoastPosition(List<int[]> coastDots) {
-        int[] max = new int[2];
-        int[] dot = new int[2];
-        for (int i = 0; i < coastDots.size(); i++){
-            if (coastDots.get(i)[2] > max[1]){
-                max[1] = coastDots.get(i)[2];
-                max[0] = i;
-            }
-        }
-        return coastDots.get(max[0]);
-    }*/
 
     private int findMaxCoastPosition(int[][] arr) {
         int pos = 0;
@@ -643,6 +624,7 @@ public class TicTacToe {
             c++;
         }
         map[r][c] = markAi;
+        checkEndGame(r, c, markAi);
     }
 
     private void setMarkMainDiagonal(int[] dot) {
@@ -653,6 +635,7 @@ public class TicTacToe {
             c++;
         }
         map[r][c] = markAi;
+        checkEndGame(r, c, markAi);
     }
 
     private void setMarkVertical(int[] dot) {
@@ -662,6 +645,7 @@ public class TicTacToe {
             r++;
         }
         map[r][c] = markAi;
+        checkEndGame(r, c, markAi);
     }
 
     private void setMarkHorizon(int[] dot) {
@@ -671,5 +655,6 @@ public class TicTacToe {
             c++;
         }
         map[r][c] = markAi;
+        checkEndGame(r, c, markAi);
     }
 }
