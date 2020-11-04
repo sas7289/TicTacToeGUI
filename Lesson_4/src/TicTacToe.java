@@ -1,7 +1,7 @@
 import java.util.*;
 
 public class TicTacToe {
-    boolean endFame = false;
+    boolean endGame = false;
     Random random = new Random();
     char markHuman, markAi;
     int rows;
@@ -17,6 +17,8 @@ public class TicTacToe {
     final char DOT_O = 'O';
     final char FIRST_SYMBOL = 'Ϯ';
     final String EMPTY = " ";
+
+    int[] lastStepHuman = new int[2];
 
     static Scanner scanner = new Scanner(System.in);
 
@@ -120,7 +122,7 @@ public class TicTacToe {
     private void playGame() {
         int firstStep = stepPriority();
         setMarks(firstStep);
-        while (endFame) {
+        while (!endGame) {
             move(firstStep);
             printMap();
         }
@@ -179,7 +181,9 @@ public class TicTacToe {
             c = humanColumn();
         }
         map[r][c] = markHuman;
-        endFame = checkEndGame(r, c, markHuman);
+        endGame = checkEndGame(r, c, markHuman, countDotToWin);
+        lastStepHuman[0] = r;
+        lastStepHuman[1] = c;
     }
 
     private int humanColumn() {
@@ -205,32 +209,53 @@ public class TicTacToe {
     }
 
     private void aiMind (){
-        if (step == 0){
-            map[random.nextInt(rows)][random.nextInt(columns)] = markAi;
-            return;
-        }
         List<int[]> coastDots = new ArrayList<>();
         int[] dot = new int[4];//0 - строка 1 - столбец 2 - линия, по которой большая цена 3 - наибольшая цена для данной точки
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < columns; j++) {
-                if (map[i][j] == markHuman){
-                    int[] temp = checkHumanWinLine(i, j);//0 - horizon; 1 - vertical; 2 - mainD; 3- secondaryD
+                if (map[i][j] == markAi){
+                    int[] temp = findAiWinLine(i, j, markAi, countDotToWin);//0 - horizon; 1 - vertical; 2 - mainD; 3- secondaryD
                     dot[0] = temp[0];
                     dot[1] = temp[1];
                     dot[2] = temp[2];
-                    dot[3] = getMaxCoast(i, j);//возвращает стоимость этой точки
+                    dot[3] = temp[3];//возвращает стоимость этой точки
                     coastDots.add(dot);
                 }
+                else if (map[i][j] == markHuman){
+                    if (stopHuman()){
+                        return;
+                    }
+                }
             }
+        }
+        if (coastDots.size() == 0){
+            map[random.nextInt(rows)][random.nextInt(columns)] = markAi;
+            return;
         }
         findTargetDot(coastDots);
     }
 
-
-    private boolean checkEndGame(int r, int c, char XO){
+    private boolean stopHuman() {
         boolean result = false;
-        if (checkHorizonLine(r, c, XO) || checkVerticalLine(r, c, XO) || checkMainDiagonal(r, c, XO) ||
-                checkSecondaryDiagonal(r, c, XO)){
+        mark: for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < columns; j++) {
+                if (checkEndGame(i, j, markHuman, countDotToWin - 1)){
+                    int[] dotHumanWin = findAiWinLine(lastStepHuman[0], lastStepHuman[1], markHuman, countDotToWin - 1);
+                    setMarkAi(dotHumanWin);
+                    result = true;
+                    break mark;
+                }
+            }
+        }
+        return result;
+    }
+
+
+    private boolean checkEndGame(int r, int c, char XO, int countDotToWin){
+        boolean result = false;
+        if (checkHorizonLine(r, c, XO, countDotToWin) || checkVerticalLine(r, c, XO, countDotToWin)
+                || checkMainDiagonal(r, c, XO, countDotToWin) ||
+                checkSecondaryDiagonal(r, c, XO, countDotToWin)){
             result = true;
         }
         if (step == maxStep){
@@ -241,71 +266,71 @@ public class TicTacToe {
     }
 
     //Проверяет горизонтальную линию на наличие победной комбинации
-    private boolean checkHorizonLine(int r, int c, char XO) {
+    private boolean checkHorizonLine(int r, int c, char XO, int countDotToWin) {
         boolean result = false;
-        int left, right, countWinDot;
+        int left, right, currentCountDot;
         int countStepLeft = 0;
         int countStepRight = 0;
         left = right = c;
         //отсчитываем необходимое для победы количество ячеек влево или чтобы оно не выходило за границы поля
-        while (left != 0 && countStepLeft != (countDotToWin -1)){
+        while (left != 0 && countStepLeft != (this.countDotToWin -1)){
             left--;
             countStepLeft++;
         }
         //отсчитываем необходимое для победы количество ячеек вправо или чтобы оно не выходило за границы поля
-        while (right != columns- 1 && countStepRight != (countDotToWin -1)){
+        while (right != columns- 1 && countStepRight != (this.countDotToWin -1)){
             right++;
             countStepRight++;
         }
         do {
-            countWinDot = 0;
-            for (int i = 0; i < countDotToWin; i++){
+            currentCountDot = 0;
+            for (int i = 0; i < this.countDotToWin; i++){
                 if (map[r][left + i] == markHuman){
-                    countWinDot++;
+                    currentCountDot++;
                 }
             }
-            if (countWinDot == 4){
+            if (currentCountDot == countDotToWin){
                 result = true;
             }
             left++;
-        } while ((left + countDotToWin - 1) <= right);
+        } while ((left + this.countDotToWin - 1) <= right);
         return result;
     }
 
 
 
     //Проверяет вериткальую линию на наличие победной комбинации
-    private boolean checkVerticalLine(int r, int c, char XO) {
+    private boolean checkVerticalLine(int r, int c, char XO, int countDotToWin) {
         boolean result = false;
-        int up, down, countWinDot;
+        int up, down, currentCountDot;
         int countStepLeft = 0;
         int countStepRight = 0;
         up = down = r;
-        while (up != 0 && countStepLeft != (countDotToWin -1)){
+        while (up != 0 && countStepLeft != (this.countDotToWin -1)){
             up--;
             countStepLeft++;
         }
-        while (down != columns- 1 && countStepRight != (countDotToWin -1)){
+        while (down != columns- 1 && countStepRight != (this.countDotToWin -1)){
             down++;
             countStepRight++;
         }
         do {
-            countWinDot = 0;
-            for (int i = 0; i < countDotToWin; i++){
+            currentCountDot = 0;
+            for (int i = 0; i < this.countDotToWin; i++){
                 if (map[up + i][c] == markHuman){
-                    countWinDot++;
+                    currentCountDot++;
                 }
             }
-            if (countWinDot == 4){
+            if (currentCountDot == countDotToWin){
                 result = true;
             }
             up++;
-        } while ((up + countDotToWin - 1) <= down);
+        } while ((up + this.countDotToWin - 1) <= down);
         return result;
     }
 
     //Вызывает необходимые методы для проверки главной диагонали на наличие победной комбинации
-    public boolean checkMainDiagonal(int r, int c, char XO) {
+    public boolean checkMainDiagonal(int r, int c, char XO, int countDotToWin) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
@@ -314,19 +339,19 @@ public class TicTacToe {
         dotLeft[1] = dotRight[1] = c;
         findMainTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
-        if (lenght >= countDotToWin) {
-            result = checkCountMainWinDots(dotLeft, dotRight, XO);
+        if (lenght >= this.countDotToWin) {
+            result = checkCountMainWinDots(dotLeft, dotRight, XO, countDotToWin);
         }
         return result;
 
     }
 
     //Проверяет, есть ли необходимое количество меток для победы
-    private boolean checkCountMainWinDots(int[] dotLeft, int[] dotRight, char XO){
+    private boolean checkCountMainWinDots(int[] dotLeft, int[] dotRight, char XO, int countDotToWin){
         boolean result = false;
         do {
             int countForWin = 0;
-            for (int i = 0; i < countDotToWin; i++) {
+            for (int i = 0; i < this.countDotToWin; i++) {
                 if (map[dotLeft[1]+i][dotLeft[0]+i] == XO) {
                     countForWin++;
                 }
@@ -358,7 +383,7 @@ public class TicTacToe {
     }
 
     //Проверяет побочную диагональ на наличие победной комбинации
-    public boolean checkSecondaryDiagonal(int r, int c, char XO) {
+    public boolean checkSecondaryDiagonal(int r, int c, char XO, int countDotToWin) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
@@ -367,8 +392,8 @@ public class TicTacToe {
         dotLeft[1] = dotRight[1] = c;// координаты У точек
         findSecondaryTermianlDots(dotLeft, dotRight);
         lenght = dotRight[0] - dotLeft[0] + 1;
-        if (lenght >= countDotToWin) {
-            result = checkCountSecondaryWinDots(dotLeft, dotRight, XO);
+        if (lenght >= this.countDotToWin) {
+            result = checkCountSecondaryWinDots(dotLeft, dotRight, XO, countDotToWin);
         }
         return  result;
 
@@ -391,11 +416,11 @@ public class TicTacToe {
     }
 
     //Проверяет, есть ли необходимое количество меток для победы
-    private boolean checkCountSecondaryWinDots(int[] dotLeft, int[] dotRight, char XO){
+    private boolean checkCountSecondaryWinDots(int[] dotLeft, int[] dotRight, char XO, int countDotToWin){
         boolean result = false;
         do {
             int countForWin = 0;
-            for (int i = 0; i < countDotToWin; i++) {
+            for (int i = 0; i < this.countDotToWin; i++) {
                 if (map[dotLeft[1]-i][dotLeft[0]+i] == XO) {
                     countForWin++;
                 }
@@ -425,7 +450,6 @@ public class TicTacToe {
             }
         }
         setMarkAi(coastDots.get(maxPos));
-        endFame = checkEndGame(coastDots.get(maxPos)[0], coastDots.get(maxPos)[1], markAi);
     }
 
 
@@ -443,14 +467,14 @@ public class TicTacToe {
     }
 
     //Проверяет ходы игрока на предмет препятсвия его победе
-    private int[] checkHumanWinLine(int r, int c) {
+    private int[] findAiWinLine(int r, int c, char mark, int countDotToWin) {
         int[][] coastDot = new int[4][3];
         boolean result = false;
         int[] temp = new int[4];
-        coastDot[0] = checkHorizonHuman(r, c);
-        coastDot[1] = checkVerticalHuman(r, c);
-        coastDot[2] = checkMainHumanDiagonal(r, c);
-        coastDot[3] = checkSecondaryHumanDiagonal(r, c);
+        coastDot[0] = checkHorizonAiWinLine(r, c, mark, countDotToWin);
+        coastDot[1] = checkVerticalAiWinLine(r, c, mark, countDotToWin);
+        coastDot[2] = checkAiWinMainDiagonal(r, c, mark, countDotToWin);
+        coastDot[3] = checkAiWinSecondaryDiagonal(r, c, mark, countDotToWin);
         int pos = findMaxCoastPosition(coastDot);
         temp[0] = coastDot[pos][0];
         temp[1] = coastDot[pos][1];
@@ -459,19 +483,19 @@ public class TicTacToe {
 
         return temp;
     }
-    private int getMaxCoast(int r, int c) {
+/*    private int getMaxCoast(int r, int c) {
         //coastDot: каждая строка массива соответствует каждому направлению (горизонталь, вертикаль и две диагонали)
         //а каждому направлению соответствует массив из трёх чисел: строка и столбец точки от которой отсчитвается
         // победное количество ячеек и, максимальная стоимость этой линии
         int[][] coastDot = new int[4][3];
         int maxCoast = 0;
-        coastDot[0] = checkHorizonHuman(r, c);
-        coastDot[1] = checkVerticalHuman(r, c);
-        coastDot[2] = checkMainHumanDiagonal(r, c);
-        coastDot[3] = checkSecondaryHumanDiagonal(r, c);
+        coastDot[0] = checkHorizonAiWinLine(r, c);
+        coastDot[1] = checkVerticalAiWinLine(r, c);
+        coastDot[2] = checkAiWinMainDiagonal(r, c);
+        coastDot[3] = checkAiWinSecondaryDiagonal(r, c);
         maxCoast = findMaxCoast(coastDot);
         return maxCoast;
-    }
+    }*/
 
     //Находит максимальную стоимость для выигрышной линии
     private int findMaxCoast(int[][] coastDot) {
@@ -488,7 +512,7 @@ public class TicTacToe {
 
 
     //Проверяет метку игрока по горизонтольной линии
-    private int[] checkHorizonHuman(int r, int c) {
+    private int[] checkHorizonAiWinLine(int r, int c, char mark, int countDotToWin) {
         boolean result = false;
         int maxCountWin = 0;
         int[] maxDot= new int[3];
@@ -507,7 +531,7 @@ public class TicTacToe {
         do {
             countWinDot = 0;
             for (int i = 0; i < countDotToWin; i++){
-                if (map[r][left + i] == markHuman){
+                if (map[r][left + i] == mark){
                     countWinDot++;
                 }
             }
@@ -529,7 +553,7 @@ public class TicTacToe {
     }
 
     //Проверяет метку игрока по вертикальной линии
-    private int[] checkVerticalHuman(int r, int c) {
+    private int[] checkVerticalAiWinLine(int r, int c, char mark, int countDotToWin) {
         int maxCountWin = 0;
         int[] maxDot= new int[3];
         boolean result = false;
@@ -548,7 +572,7 @@ public class TicTacToe {
         do {
             countWinDot = 0;
             for (int i = 0; i < countDotToWin; i++){
-                if (map[up + i][c] == markHuman){
+                if (map[up + i][c] == mark){
                     countWinDot++;
                 }
             }
@@ -563,7 +587,7 @@ public class TicTacToe {
     }
 
     //Проверяет метку игрока по главной диагонали
-    public int[] checkMainHumanDiagonal(int r, int c) {
+    public int[] checkAiWinMainDiagonal(int r, int c, char mark, int countDotToWin) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
@@ -572,20 +596,20 @@ public class TicTacToe {
         dotLeft[1] = dotRight[1] = c;
         findMainTermianlDots(dotLeft, dotRight);
         lenght = Math.abs(dotRight[0] - dotLeft[0]) + 1;
-        if (lenght >= countDotToWin) {
-            return checkCountHumanMainWinDots(dotLeft, dotRight);
+        if (lenght >= this.countDotToWin) {
+            return checkCountHumanMainWinDots(dotLeft, dotRight, mark, countDotToWin);
         }
         return new int[3];
     }
 
 
     //Возвращает точку игрока с наибольшой ценой
-    private int[] checkCountHumanMainWinDots(int[] dotLeft, int[] dotRight){
+    private int[] checkCountHumanMainWinDots(int[] dotLeft, int[] dotRight, char mark, int countDotToWin){
         int[] maxDot = new int[3];
         do {
             int countForWin = 0;
-            for (int i = 0; i < countDotToWin; i++) {
-                if (map[dotLeft[0]+i][dotLeft[1]+i] == markHuman) {
+            for (int i = 0; i < this.countDotToWin; i++) {
+                if (map[dotLeft[0]+i][dotLeft[1]+i] == mark) {
                     countForWin++;
                 }
             }
@@ -596,12 +620,12 @@ public class TicTacToe {
             }
             dotLeft[0]++;
             dotLeft[1]++;
-        }while (dotLeft[0]+countDotToWin -1 <=dotRight[0] || dotLeft[1]+3<=dotRight[1]);
+        }while (dotLeft[0]+this.countDotToWin -1 <=dotRight[0] || dotLeft[1]+3<=dotRight[1]);
         return  maxDot;
     }
 
     //Проверяет метку игрока на побочной диагонали
-    public int[] checkSecondaryHumanDiagonal(int r, int c) {
+    public int[] checkAiWinSecondaryDiagonal(int r, int c, char mark, int countDotToWin) {
         boolean result = false;
         double lenght;
         int[] dotLeft = new int[2];
@@ -611,20 +635,20 @@ public class TicTacToe {
         findSecondaryTermianlDots(dotLeft, dotRight);
         lenght = Math.abs(dotRight[0] - dotLeft[0]) + 1;
         if (lenght >= countDotToWin) {
-            return checkCountHumanSecondaryWinDots(dotLeft, dotRight);
+            return checkCountHumanSecondaryWinDots(dotLeft, dotRight, mark, countDotToWin);
         }
         return new int[3];
     }
 
     //Возвращает точку игрока с наибольшой ценой
-    private int[] checkCountHumanSecondaryWinDots(int[] dotLeft, int[] dotRight){
+    private int[] checkCountHumanSecondaryWinDots(int[] dotLeft, int[] dotRight, char mark, int countDotToWin){
         int maxCoast = 0;
         int[] maxDot= new int[3];
         boolean result = false;
         do {
             int countForWin = 0;
             for (int i = 0; i < countDotToWin; i++) {
-                if (map[dotLeft[0]-i][dotLeft[1]+i] == markHuman) {
+                if (map[dotLeft[0]-i][dotLeft[1]+i] == mark) {
                     countForWin++;
                 }
             }
@@ -663,7 +687,7 @@ public class TicTacToe {
             c++;
         }
         map[r][c] = markAi;
-        checkEndGame(r, c, markAi);
+        endGame = checkEndGame(r, c, markAi, countDotToWin);
     }
 
     private void setMarkMainDiagonal(int[] dot) {
@@ -674,7 +698,7 @@ public class TicTacToe {
             c++;
         }
         map[r][c] = markAi;
-        checkEndGame(r, c, markAi);
+        endGame = checkEndGame(r, c, markAi, countDotToWin);
     }
 
     private void setMarkVertical(int[] dot) {
@@ -684,7 +708,7 @@ public class TicTacToe {
             r++;
         }
         map[r][c] = markAi;
-        checkEndGame(r, c, markAi);
+        endGame = checkEndGame(r, c, markAi, countDotToWin);
     }
 
     private void setMarkHorizon(int[] dot) {
@@ -694,6 +718,6 @@ public class TicTacToe {
             c++;
         }
         map[r][c] = markAi;
-        checkEndGame(r, c, markAi);
+        endGame = checkEndGame(r, c, markAi, countDotToWin);
     }
 }
