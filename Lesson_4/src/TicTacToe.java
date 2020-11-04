@@ -1,6 +1,7 @@
 import java.util.*;
 
 public class TicTacToe {
+    boolean endFame = false;
     Random random = new Random();
     char markHuman, markAi;
     int rows;
@@ -8,7 +9,7 @@ public class TicTacToe {
     char[][] map;
     int step;
     int countDotToWin;
-    int maxStep;
+    int maxStep; //максимальное количество ходов на всю партию
     final int COUNT_WIN_LINE = 4;
     final char DOT_EMPTY = '•';
     final char[] DOT_XO = {'X','O'};
@@ -20,32 +21,40 @@ public class TicTacToe {
     static Scanner scanner = new Scanner(System.in);
 
 
+    public TicTacToe (int row, int col){
+        rows = row;
+        columns = col;
+    }
+
     public TicTacToe (){
         inputRow();
         inputColumn();
     }
 
     private void inputColumn() {
-        System.out.print("Количество столбцов: ");
-        while (!scanner.hasNextInt()){
-            System.out.print("Не по тем кнопкам попадаешь, прицелься получше\nКоличество столбцов:");
-            scanner.next();
-        }
-        columns = scanner.nextInt();
+        int columnCount = 0;
+        do {
+            System.out.println("Количество столбцов: ");
+            while (!scanner.hasNextInt()){
+                System.out.print("Не по тем кнопкам попадаешь, прицелься получше\nКоличество столбцов:");
+                scanner.next();
+            }
+            columnCount = scanner.nextInt();
+        } while (columnCount < 0);
+        columns = columnCount;
     }
 
     private void inputRow() {
-        System.out.print("Введите размер поля\nКоличество строк: ");
-        while (!scanner.hasNextInt()){
-            System.out.print("Не по тем кнопкам попадаешь, пробуй ещё разок\nКоличество строк: ");
-            scanner.next();
-        }
-        rows = scanner.nextInt();
-    }
-
-    public TicTacToe (int row, int col){
-        rows = row;
-        columns = col;
+        int rowsCount = 0;
+        do {
+            System.out.print("Количество строк: ");
+            while (!scanner.hasNextInt()) {
+                System.out.print("Не по тем кнопкам попадаешь, пробуй ещё разок\nКоличество строк: ");
+                scanner.next();
+            }
+            rowsCount = scanner.nextInt();
+        } while (rowsCount < 0);
+        rows = rowsCount;
     }
 
     public void turnGame() {
@@ -58,6 +67,7 @@ public class TicTacToe {
     }
 
     private void initNum() {
+        //инициализируем количество ячеек, необходимых для выигрыша и максимальное количестов ходов на всю партию
         step = 0;
         maxStep = rows * columns;
         if (rows >= 3 && rows < 6 && columns >= 3 && columns < 6){
@@ -110,16 +120,19 @@ public class TicTacToe {
     private void playGame() {
         int firstStep = stepPriority();
         setMarks(firstStep);
-        boolean endGame = false;
-        while (!endGame) {
+        while (endFame) {
             move(firstStep);
             printMap();
         }
-        System.out.print("1. Начать сначада\n2. Выход из игры\nChoose your destiny: ");
-        while(!scanner.hasNextInt()){
-            System.out.println("Одно из двух, красная или синия...");
-            scanner.next();
-        }
+        int yourChoose = 0;
+        do {
+            System.out.print("1. Начать сначала\n2. Выход из игры\nChoose your destiny: ");
+            while (!scanner.hasNextInt()) {
+                System.out.println("Одно из двух, красная или синия...");
+                scanner.next();
+            }
+            yourChoose = scanner.nextInt();
+        } while (yourChoose != 1 && yourChoose != 2);
         switch (scanner.nextInt()){
             case 1:
                 break;
@@ -166,7 +179,7 @@ public class TicTacToe {
             c = humanColumn();
         }
         map[r][c] = markHuman;
-        checkEndGame(r, c, markHuman);
+        endFame = checkEndGame(r, c, markHuman);
     }
 
     private int humanColumn() {
@@ -211,8 +224,6 @@ public class TicTacToe {
             }
         }
         findTargetDot(coastDots);
-
-
     }
 
 
@@ -236,11 +247,13 @@ public class TicTacToe {
         int countStepLeft = 0;
         int countStepRight = 0;
         left = right = c;
+        //отсчитываем необходимое для победы количество ячеек влево или чтобы оно не выходило за границы поля
         while (left != 0 && countStepLeft != (countDotToWin -1)){
             left--;
             countStepLeft++;
         }
-        while (right != columns- 1 && countStepRight != (countDotToWin -1) && !result){
+        //отсчитываем необходимое для победы количество ячеек вправо или чтобы оно не выходило за границы поля
+        while (right != columns- 1 && countStepRight != (countDotToWin -1)){
             right++;
             countStepRight++;
         }
@@ -272,7 +285,7 @@ public class TicTacToe {
             up--;
             countStepLeft++;
         }
-        while (down != columns- 1 && countStepRight != (countDotToWin -1) && !result){
+        while (down != columns- 1 && countStepRight != (countDotToWin -1)){
             down++;
             countStepRight++;
         }
@@ -412,6 +425,7 @@ public class TicTacToe {
             }
         }
         setMarkAi(coastDots.get(maxPos));
+        endFame = checkEndGame(coastDots.get(maxPos)[0], coastDots.get(maxPos)[1], markAi);
     }
 
 
@@ -446,6 +460,9 @@ public class TicTacToe {
         return temp;
     }
     private int getMaxCoast(int r, int c) {
+        //coastDot: каждая строка массива соответствует каждому направлению (горизонталь, вертикаль и две диагонали)
+        //а каждому направлению соответствует массив из трёх чисел: строка и столбец точки от которой отсчитвается
+        // победное количество ячеек и, максимальная стоимость этой линии
         int[][] coastDot = new int[4][3];
         int maxCoast = 0;
         coastDot[0] = checkHorizonHuman(r, c);
@@ -483,7 +500,7 @@ public class TicTacToe {
             left--;
             countStepLeft++;
         }
-        while (left != columns && countStepRight != (countDotToWin -1) && !result){
+        while (left != columns && countStepRight != (countDotToWin -1)){
             right++;
             countStepRight++;
         }
@@ -524,7 +541,7 @@ public class TicTacToe {
             up--;
             countStepUp++;
         }
-        while (down != rows && countStepDown != (countDotToWin -1) && !result){
+        while (down != rows && countStepDown != (countDotToWin -1)){
             down++;
             countStepDown++;
         }
