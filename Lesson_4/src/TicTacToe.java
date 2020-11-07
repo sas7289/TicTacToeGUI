@@ -11,6 +11,15 @@ public class TicTacToe {
     int countDotToWin;
     int maxStep; //максимальное количество ходов на всю партию
     final int COUNT_WIN_LINE = 4;
+
+    public int getRows() {
+        return rows;
+    }
+
+    public int getColumns() {
+        return columns;
+    }
+
     final char DOT_EMPTY = '•';
     final char[] DOT_XO = {'X','O'};
     final char DOT_X = 'X';
@@ -66,6 +75,26 @@ public class TicTacToe {
             printMap();
             playGame();
         }
+    }
+
+    public char getStatusCell(int position){
+        int cellRow = position / columns;
+        int cellColumn = cellRow * columns + position % columns;
+        return map[cellRow][cellColumn];
+    }
+    public boolean toGo (int position){
+        if (getStatusCell(position) == DOT_EMPTY){
+            return true;
+        }
+        return false;
+    }
+
+    public char getMarkHuman() {
+        return markHuman;
+    }
+
+    public char getMarkAi() {
+        return markAi;
     }
 
     private void initNum() {
@@ -162,19 +191,16 @@ public class TicTacToe {
         }
     }
 
-    private void move(int first) {
-        if (first%2 == step%2){
-            humanMove();
-        }
-        else {
-            aiMove();
-        }
+    public void move(int position) {
+        humanMove(position);
+        aiMove();
         step++;
     }
 
-    private void humanMove() {
-        int r = humanRow();
-        int c = humanColumn();
+    public void humanMove(int position) {
+        int[] dot = getDotXY(position);
+        int r = dot[0];
+        int c = dot[1];
         while (map[r][c] != DOT_EMPTY){
             System.out.println("Выбранная ячейка занята, выбери другую");
             r = humanRow();
@@ -184,6 +210,13 @@ public class TicTacToe {
         endGame = checkEndGame(r, c, markHuman, countDotToWin);
         lastStepHuman[0] = r;
         lastStepHuman[1] = c;
+    }
+
+    public int[] getDotXY(int position){
+        int[] dot = new int[2];
+        dot[0] = position / columns;
+        dot[1] = dot[0] * columns + position % columns;
+        return dot;
     }
 
     private int humanColumn() {
@@ -204,10 +237,13 @@ public class TicTacToe {
         return scanner.nextInt() - 1;
     }
 
-    private void aiMove() {
+    public void aiMove() {
         aiMind();
     }
 
+    public int aiStep() {
+        aiMind();
+    }
     private void aiMind (){
         List<int[]> coastDots = new ArrayList<>();
         int[] dot = new int[4];//0 - строка 1 - столбец 2 - линия, по которой большая цена 3 - наибольшая цена для данной точки
@@ -720,4 +756,6 @@ public class TicTacToe {
         map[r][c] = markAi;
         endGame = checkEndGame(r, c, markAi, countDotToWin);
     }
+
+
 }
