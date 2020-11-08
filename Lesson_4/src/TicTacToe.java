@@ -793,7 +793,7 @@ public class TicTacToe {
         dotLeft[1] = dotRight[1] = c;// координаты У точек
         findSecondaryTermianlDots(dotLeft, dotRight);
         lenght = Math.abs(dotRight[0] - dotLeft[0]) + 1;
-        if (lenght >= countDotToWin) {
+        if (lenght >= this.countDotToWin) {
             return checkCountHumanSecondaryWinDots(dotLeft, dotRight, mark, countDotToWin);
         }
         return new int[3];
@@ -823,7 +823,7 @@ public class TicTacToe {
             }
             dotLeft[0]--;
             dotLeft[1]++;
-        }while (dotLeft[0]+countDotToWin - 1<=dotRight[0] ||dotLeft[1]-3>=dotRight[1]);
+        }while (dotLeft[0]+this.countDotToWin - 1<=dotRight[0] ||dotLeft[1]-3>=dotRight[1]);
         return maxDot;
     }
 
