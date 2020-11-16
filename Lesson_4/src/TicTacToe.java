@@ -1,6 +1,8 @@
 import java.util.*;
 
 public class TicTacToe {
+
+    int e = new int[3][2].length;
     boolean endGame = false;
     Random random = new Random();
     char markHuman, markAi;
@@ -38,8 +40,14 @@ public class TicTacToe {
     }
 
     public TicTacToe (){
-        inputRow();
-        inputColumn();
+/*        inputRow();
+        inputColumn();*/
+    }
+
+    public void reboot (int rows, int columns){
+        this.rows = rows;
+        this.columns = columns;
+        initNum();
     }
 
     private void inputColumn() {
@@ -67,6 +75,7 @@ public class TicTacToe {
         } while (rowsCount < 0);
         rows = rowsCount;
     }
+
 
     public void turnGame() {
         while(true) {
@@ -816,6 +825,7 @@ public class TicTacToe {
                     break;
                 }
             }
+
             if (countForWin > maxDot[2]) {
                 maxDot[2] = countForWin;
                 maxDot[0] = dotLeft[0];
