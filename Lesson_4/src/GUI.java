@@ -11,6 +11,8 @@ public class GUI extends JFrame {
     int tempRow;
     int tempCol;
     Panel gameField;
+    int DEFAULT_ROWS = 3;
+    int DEFAULT_COLUMNS = 3;
 
     public GUI(TicTacToe currentGame) {
         this.currentGame = currentGame;
@@ -26,7 +28,7 @@ public class GUI extends JFrame {
         currentGame.initNum();
 
 
-        gameField = new Panel(new GridLayout(rows, columns));
+
 
 
 
@@ -113,8 +115,8 @@ public class GUI extends JFrame {
 
 
 
-
-        Panel gameField = createGameField(rows, columns);
+        gameField = new Panel(new GridLayout(DEFAULT_ROWS, DEFAULT_COLUMNS));
+        gameField = createGameField(DEFAULT_ROWS, DEFAULT_COLUMNS);
 
         setJMenuBar(menuBar);
         add(preference);
@@ -167,6 +169,7 @@ public class GUI extends JFrame {
 
     private void reboot (){
         currentGame.reboot(tempRow, tempCol);
+        gameField.setLayout(new GridLayout(tempRow, tempCol));
         gameField = createGameField(tempRow, tempCol);
         gameField.revalidate();
     }

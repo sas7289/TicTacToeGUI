@@ -40,8 +40,8 @@ public class TicTacToe {
     }
 
     public TicTacToe (){
-        inputRow();
-        inputColumn();
+/*        inputRow();
+        inputColumn();*/
     }
 
     public void reboot (int rows, int columns){
